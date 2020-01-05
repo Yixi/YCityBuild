@@ -9,10 +9,10 @@ module.exports = {
     filename: "[name]-[hash:7].js",
     path: path.resolve(__dirname, "../dist"),
     chunkFilename: "[chunkhash].js",
-    publicPath: "/",
+    publicPath: "",
   },
   context: path.resolve(__dirname, "../src"),
-  devtool: "nosources-source-map",
+  devtool: "hidden-source-map",
   bail: true,
   mode: "production",
   module: {
