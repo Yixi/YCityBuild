@@ -9,6 +9,16 @@ export interface IMapData {
 
 class Store {
   map: IMapData[][]
+  road: Array<[number, number]> = [
+    [46, 50],
+    [47, 50],
+    [48, 50],
+    [49, 50],
+    [50, 50],
+    [51, 50],
+    [52, 50],
+    [53, 50],
+  ]
 
   initMap = (width: number, height: number) => {
     this.map = chunk(

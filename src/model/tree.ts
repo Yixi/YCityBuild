@@ -27,7 +27,7 @@ export const createTree = (scene: BABYLON.Scene) => {
   leaf.material = leafMaterials
   leaf.position = new BABYLON.Vector3(0, trunkHeight + leafHeight / 2 , 0)
 
-  const tree = BABYLON.Mesh.MergeMeshes(
+  return BABYLON.Mesh.MergeMeshes(
       [trunk, leaf],
       true,
       true,
@@ -35,5 +35,4 @@ export const createTree = (scene: BABYLON.Scene) => {
       false,
       true
   )
-  return tree
 }

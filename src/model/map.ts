@@ -1,6 +1,5 @@
 import * as BABYLON from 'babylonjs'
 import { store } from '@root/data/store'
-import { initCamera } from '@root/camera'
 
 export const initMap = (scene: BABYLON.Scene, mapWidth: number, mapHeight: number) => {
 

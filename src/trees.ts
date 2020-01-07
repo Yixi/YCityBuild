@@ -5,7 +5,7 @@ import { store } from '@root/data/store'
 
 let baseTree: BABYLON.Mesh
 
-export const createTrees = (scene: BABYLON.Scene) => {
+export const buildTrees = (scene: BABYLON.Scene) => {
 
   if (!baseTree) {
     baseTree = createTree(scene)
