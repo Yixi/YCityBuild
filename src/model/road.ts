@@ -1,6 +1,15 @@
 import * as BABYLON from 'babylonjs'
 
-export const createRoad = (scene: BABYLON.Scene, x: number, z: number) => {
+export enum ROAD_TYPE {
+  HORIZONTAL,
+  VERTICAL,
+  T_INTERSECTION,
+  CROSSROAD,
+}
+
+export const ROAD_NAME = 'road'
+
+export const createRoad = (scene: BABYLON.Scene, x: number, z: number, type: ROAD_TYPE = ROAD_TYPE.HORIZONTAL) => {
 
   const shoulderMaterials = new BABYLON.StandardMaterial('shoulder', scene)
   shoulderMaterials.diffuseColor = new BABYLON.Color3(0.83, 0.79, 0.77)
@@ -13,7 +22,7 @@ export const createRoad = (scene: BABYLON.Scene, x: number, z: number) => {
       {
         width: 1,
         height: 0.02,
-        depth: 0.08,
+        depth: 0.1,
       },
       scene
   )
@@ -24,18 +33,19 @@ export const createRoad = (scene: BABYLON.Scene, x: number, z: number) => {
       'roadBed',
       {
         width: 1,
-        size: 0.72,
+        size: 0.8,
       },
       scene
   )
   roadBed.material = roadBedMaterials
 
-  shoulder.position = new BABYLON.Vector3(x, 0.01, z)
-  rightShoulder.position = new BABYLON.Vector3(x, 0.01, z + 0.8)
-  roadBed.position = new BABYLON.Vector3(x, 0.001, z + 0.4)
+  shoulder.position = new BABYLON.Vector3(0, 0.01, -0.45)
+  rightShoulder.position = new BABYLON.Vector3(0, 0.01,  0.45)
+
+  roadBed.position = new BABYLON.Vector3(0, 0.001,  0)
   roadBed.rotation = new BABYLON.Vector3(Math.PI / 2, 0, 0)
 
-  return BABYLON.Mesh.MergeMeshes(
+  const road = BABYLON.Mesh.MergeMeshes(
       [shoulder, rightShoulder, roadBed],
       true,
       true,
@@ -43,4 +53,12 @@ export const createRoad = (scene: BABYLON.Scene, x: number, z: number) => {
       false,
       true
   )
+  road.name = ROAD_NAME
+  road.position= new BABYLON.Vector3(x, 0, z)
+
+  if (type === ROAD_TYPE.VERTICAL) {
+    road.rotation = new BABYLON.Vector3(0, Math.PI / 2, 0)
+  }
+
+  return road
 }
