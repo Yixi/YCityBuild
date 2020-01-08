@@ -4,12 +4,12 @@ import { store } from '@root/data/store'
 
 export const buildRoads = (scene: BABYLON.Scene) => {
 
-  const t = createRoad(scene, 46, 50, ROAD_TYPE.T_INTERSECTION)
-  store.map[46][50].info.type = ROAD_TYPE.T_INTERSECTION
+  const t = createRoad(scene, 46, 50, ROAD_TYPE.CONNER)
+  store.map[46][50].info.type = ROAD_TYPE.CONNER
   store.map[46][50].mesh = t
 
-  const t2 = createRoad(scene, 46, 53, ROAD_TYPE.T_INTERSECTION, Math.PI)
-  store.map[46][53].info.type = ROAD_TYPE.T_INTERSECTION
+  const t2 = createRoad(scene, 46, 53, ROAD_TYPE.CONNER, Math.PI)
+  store.map[46][53].info.type = ROAD_TYPE.CONNER
   store.map[46][53].mesh = t
 
   store.road.forEach(([x, z]) => {

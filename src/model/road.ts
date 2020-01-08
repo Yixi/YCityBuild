@@ -3,6 +3,7 @@ import * as BABYLON from 'babylonjs'
 export enum ROAD_TYPE {
   HORIZONTAL,
   VERTICAL,
+  CONNER,
   T_INTERSECTION,
   CROSSROAD,
 }
@@ -133,7 +134,7 @@ export const createRoad = (
     }
   }
 
-  if (ROAD_TYPE.T_INTERSECTION === type) {
+  if (ROAD_TYPE.CONNER === type) {
     road = createTIntersectionRoad(scene, [shoulderMaterials, roadBedMaterials])
   }
 
