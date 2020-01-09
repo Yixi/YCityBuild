@@ -1,5 +1,5 @@
 import * as BABYLON from 'babylonjs'
-import { range, fill, chunk } from 'lodash'
+import { range, chunk } from 'lodash'
 
 export interface IMapData {
   x: number,
@@ -21,7 +21,9 @@ class Store {
     [48, 50],
     [49, 50],
     [50, 50],
-    [51, 50],
+    // [51, 50],
+    [51, 52],
+    [51, 51],
     [52, 50],
     [53, 50],
   ]

@@ -54,7 +54,7 @@ const createHorizontalRoad = (
   return road
 }
 
-const createTIntersectionRoad = (
+const createConnerRoad = (
     scene: BABYLON.Scene,
     [shoulderMaterials, roadBedMaterials]: [BABYLON.StandardMaterial, BABYLON.StandardMaterial]
 ) => {
@@ -111,6 +111,63 @@ const createTIntersectionRoad = (
   return road
 }
 
+const createTIntersectionRoad = (
+    scene: BABYLON.Scene,
+    [shoulderMaterials, roadBedMaterials]: [BABYLON.StandardMaterial, BABYLON.StandardMaterial]
+) => {
+  const shoulder = BABYLON.MeshBuilder.CreateBox(
+      'shoulder',
+      {
+        width: 1,
+        height: 0.02,
+        depth: 0.1,
+      },
+      scene
+  )
+  const shoulderConnerLeft = BABYLON.MeshBuilder.CreateBox(
+      'shoulderConnerLeft',
+      {
+        width: 0.1,
+        height: 0.02,
+        depth: 0.1,
+      },
+      scene
+  )
+  shoulder.material = shoulderMaterials
+  shoulderConnerLeft.material = shoulderMaterials
+
+  const shoulderConnerRight = shoulderConnerLeft.clone()
+
+  const roadBed = BABYLON.MeshBuilder.CreatePlane(
+      'roadBed',
+      {
+        width: 1,
+        height: 0.9,
+      },
+      scene
+  )
+  roadBed.material = roadBedMaterials
+
+  shoulder.position = new BABYLON.Vector3(0, 0.01, -0.45)
+  shoulderConnerLeft.position = new BABYLON.Vector3(0.45, 0.01, 0.45)
+  shoulderConnerRight.position = new BABYLON.Vector3(-0.45, 0.01, 0.45)
+
+  roadBed.position = new BABYLON.Vector3(0, 0.001, 0.05)
+  roadBed.rotation.x = Math.PI / 2
+
+  const road = BABYLON.Mesh.MergeMeshes(
+      [shoulder, shoulderConnerLeft, shoulderConnerRight, roadBed],
+      true,
+      true,
+      undefined,
+      false,
+      true
+  )
+  road.name = ROAD_NAME
+  return road
+
+}
+
 export const createRoad = (
     scene: BABYLON.Scene,
     x: number,
@@ -135,6 +192,10 @@ export const createRoad = (
   }
 
   if (ROAD_TYPE.CONNER === type) {
+    road = createConnerRoad(scene, [shoulderMaterials, roadBedMaterials])
+  }
+
+  if (ROAD_TYPE.T_INTERSECTION === type) {
     road = createTIntersectionRoad(scene, [shoulderMaterials, roadBedMaterials])
   }
 
