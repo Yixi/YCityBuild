@@ -1,4 +1,5 @@
 const path = require('path')
+const webpack = require('webpack')
 const HTMLWebpackPlugin = require('html-webpack-plugin')
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin")
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
@@ -50,6 +51,10 @@ module.exports = {
     new HTMLWebpackPlugin({
       template: "../src/app.html",
       filename: "index.html",
+    }),
+    new webpack.optimize.AggressiveSplittingPlugin({
+      minSize: 30000,
+      maxSize: 300000
     }),
   ]
 }
