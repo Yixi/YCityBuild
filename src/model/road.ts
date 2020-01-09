@@ -165,6 +165,60 @@ const createTIntersectionRoad = (
   )
   road.name = ROAD_NAME
   return road
+}
+
+const createCrossroadRoad = (
+    scene: BABYLON.Scene,
+    [shoulderMaterials, roadBedMaterials]: [BABYLON.StandardMaterial, BABYLON.StandardMaterial]
+) => {
+  const shoulderConnerA = BABYLON.MeshBuilder.CreateBox(
+      'shoulderConner',
+      {
+        width: 0.1,
+        height: 0.02,
+        depth: 0.1,
+      },
+      scene
+  )
+  shoulderConnerA.material = shoulderMaterials
+  const shoulderConnerB = shoulderConnerA.clone()
+  const shoulderConnerC = shoulderConnerA.clone()
+  const shoulderConnerD = shoulderConnerA.clone()
+
+  const roadBed = BABYLON.MeshBuilder.CreatePlane(
+      'roadBed',
+      {
+        width: 1,
+        height: 1,
+      },
+      scene
+  )
+  roadBed.material = roadBedMaterials
+
+  shoulderConnerA.position = new BABYLON.Vector3(0.45, 0.01, 0.45)
+  shoulderConnerB.position = new BABYLON.Vector3(-0.45, 0.01, 0.45)
+  shoulderConnerC.position = new BABYLON.Vector3(0.45, 0.01, -0.45)
+  shoulderConnerD.position = new BABYLON.Vector3(-0.45, 0.01, -0.45)
+
+  roadBed.position.y = 0.001
+  roadBed.rotation.x = Math.PI / 2
+
+  const road = BABYLON.Mesh.MergeMeshes(
+      [
+        roadBed,
+        shoulderConnerA,
+        shoulderConnerB,
+        shoulderConnerC,
+        shoulderConnerD,
+      ],
+      true,
+      true,
+      undefined,
+      false,
+      true
+  )
+  road.name = ROAD_NAME
+  return road
 
 }
 
@@ -197,6 +251,10 @@ export const createRoad = (
 
   if (ROAD_TYPE.T_INTERSECTION === type) {
     road = createTIntersectionRoad(scene, [shoulderMaterials, roadBedMaterials])
+  }
+
+  if (ROAD_TYPE.CROSSROAD === type) {
+    road = createCrossroadRoad(scene, [shoulderMaterials, roadBedMaterials])
   }
 
   if (rotate) {

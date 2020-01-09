@@ -16,6 +16,10 @@ export const buildRoads = (scene: BABYLON.Scene) => {
   store.map[51][50].info.type = ROAD_TYPE.T_INTERSECTION
   store.map[51][50].mesh = t3
 
+  const c1 = createRoad(scene, 48, 50, ROAD_TYPE.CROSSROAD)
+  store.map[48][50].info.type = ROAD_TYPE.CROSSROAD
+  store.map[48][50].mesh = c1
+
   store.road.forEach(([x, z]) => {
     const road = createRoad(scene, x, z)
     store.map[x][z].info.type = ROAD_TYPE.HORIZONTAL
