@@ -1,38 +1,69 @@
 import * as BABYLON from 'babylonjs'
-import { createRoad, ROAD_NAME, ROAD_TYPE } from '@root/model/road'
+import { createRoad, ROAD_TYPE } from '@root/model/road'
 import { store } from '@root/data/store'
+import { MESH_TYPE } from '@root/model/type'
+
+const initRoadData = () => {
+  store.road.forEach(([x, z]) => {
+    store.map[x][z].meshType = MESH_TYPE.ROAD
+  })
+}
+
+const calculateRoadType = ([x, z]: [number, number]) => {
+  const around = [
+    store.map[x + 1][z].meshType,
+    store.map[x][z - 1].meshType,
+    store.map[x - 1][z].meshType,
+    store.map[x][z + 1].meshType,
+  ]
+
+  const roads = around.filter((type) => type === MESH_TYPE.ROAD)
+  const roadInfo = store.map[x][z].info as { type?: ROAD_TYPE, rotate?: number }
+
+  if (roads.length === 4) {
+    roadInfo.type = ROAD_TYPE.CROSSROAD
+  } else if (roads.length === 3) {
+    roadInfo.type = ROAD_TYPE.T_INTERSECTION
+  } else if (roads.length === 2) {
+    if (around[0] === MESH_TYPE.ROAD && around[2] === MESH_TYPE.ROAD) {
+      roadInfo.type = ROAD_TYPE.HORIZONTAL
+    } else if (around[1] === MESH_TYPE.ROAD && around[3] === MESH_TYPE.ROAD) {
+      roadInfo.type = ROAD_TYPE.VERTICAL
+    } else {
+      roadInfo.type = ROAD_TYPE.CONNER
+      if (around[0] === MESH_TYPE.ROAD && around[1] === MESH_TYPE.ROAD) {
+        roadInfo.rotate = Math.PI / 2
+      } else if (around[0] === MESH_TYPE.ROAD && around[3] === MESH_TYPE.ROAD) {
+        roadInfo.rotate = Math.PI * 2
+      } else if (around[1] === MESH_TYPE.ROAD && around[2] === MESH_TYPE.ROAD) {
+        roadInfo.rotate = Math.PI
+      } else if (around[2] === MESH_TYPE.ROAD && around[3] === MESH_TYPE.ROAD) {
+        roadInfo.rotate = Math.PI / 2 * 3
+      }
+    }
+
+  } else if (roads.length === 1) {
+    if (around[0] === MESH_TYPE.ROAD || around[2] === MESH_TYPE.ROAD) {
+      roadInfo.type = ROAD_TYPE.HORIZONTAL
+    } else {
+      roadInfo.type = ROAD_TYPE.VERTICAL
+    }
+  }
+
+}
 
 export const buildRoads = (scene: BABYLON.Scene) => {
+  initRoadData()
 
-  const t = createRoad(scene, 46, 50, ROAD_TYPE.CONNER)
-  store.map[46][50].info.type = ROAD_TYPE.CONNER
-  store.map[46][50].mesh = t
-
-  const t2 = createRoad(scene, 46, 53, ROAD_TYPE.CONNER, Math.PI)
-  store.map[46][53].info.type = ROAD_TYPE.CONNER
-  store.map[46][53].mesh = t2
-
-  const t3 = createRoad(scene, 51, 50, ROAD_TYPE.T_INTERSECTION)
-  store.map[51][50].info.type = ROAD_TYPE.T_INTERSECTION
-  store.map[51][50].mesh = t3
-
-  const c1 = createRoad(scene, 48, 50, ROAD_TYPE.CROSSROAD)
-  store.map[48][50].info.type = ROAD_TYPE.CROSSROAD
-  store.map[48][50].mesh = c1
-
+  store.road.forEach(calculateRoadType)
   store.road.forEach(([x, z]) => {
-    const road = createRoad(scene, x, z)
-    store.map[x][z].info.type = ROAD_TYPE.HORIZONTAL
-    store.map[x][z].mesh = road
-
-    if (
-        store.map[x][z + 1].mesh?.name === ROAD_NAME ||
-        store.map[x][z - 1].mesh?.name === ROAD_NAME
-    ) {
-      scene.removeMesh(store.map[x][z].mesh)
-      store.map[x][z].mesh = createRoad(scene, x, z, ROAD_TYPE.VERTICAL)
-      store.map[x][z].info.type = ROAD_TYPE.VERTICAL
-    }
+    store.map[x][z].mesh = createRoad(
+        scene,
+        x,
+        z,
+        store.map[x][z].info.type,
+        store.map[x][z].info.rotate
+    )
   })
 
 }
