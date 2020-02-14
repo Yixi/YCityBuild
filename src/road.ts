@@ -67,3 +67,41 @@ export const buildRoads = (scene: BABYLON.Scene) => {
   })
 
 }
+
+const rebuildRoad = (x: number, z: number, scene: BABYLON.Scene) => {
+  calculateRoadType([x, z])
+  if (store.map[x][z].mesh) {
+    store.map[x][z].mesh.dispose()
+  }
+  store.map[x][z].mesh = createRoad(
+    scene,
+    x,
+    z,
+    store.map[x][z].info.type,
+    store.map[x][z].info.rotate
+  )
+}
+
+const rebuildSurroundingArea = (x: number, z: number, scene: BABYLON.Scene) => {
+  for (let i = x-1; i <= x+1; i++ ) {
+    for (let j = z-1; j <= z+1; j++) {
+      if(store.map[i][j].meshType === MESH_TYPE.ROAD) {
+        rebuildRoad(i, j, scene)
+      }
+    }
+  }
+}
+
+export const clickToBuildRoad = (scene: BABYLON.Scene) => {
+  scene.onPointerObservable.add((pointerInfo: BABYLON.PointerInfo) => {
+    switch (pointerInfo.type) {
+        case BABYLON.PointerEventTypes.POINTERTAP:
+            const x: number = Math.round(pointerInfo.pickInfo.pickedPoint.x)
+            const z: number = Math.round(pointerInfo.pickInfo.pickedPoint.z)
+            store.map[x][z].meshType = MESH_TYPE.ROAD
+            rebuildSurroundingArea(x, z, scene)
+            break
+    }
+})
+
+}
