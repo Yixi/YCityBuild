@@ -24,6 +24,7 @@ const calculateRoadType = ([x, z]: [number, number]) => {
     roadInfo.type = ROAD_TYPE.CROSSROAD
   } else if (roads.length === 3) {
     roadInfo.type = ROAD_TYPE.T_INTERSECTION
+    roadInfo.rotate = calculateRotationForTIntersection(around)
   } else if (roads.length === 2) {
     if (around[0] === MESH_TYPE.ROAD && around[2] === MESH_TYPE.ROAD) {
       roadInfo.type = ROAD_TYPE.HORIZONTAL
@@ -50,6 +51,23 @@ const calculateRoadType = ([x, z]: [number, number]) => {
     }
   }
 
+}
+
+const calculateRotationForTIntersection = (around: MESH_TYPE[]) => {
+  const isRoad = around.map((type) => type === MESH_TYPE.ROAD )
+  if (!isRoad[1]) {
+    return 0
+  }
+  if (!isRoad[2]) {
+    return Math.PI / 2
+  }
+  if (!isRoad[3]) {
+    return Math.PI
+  }
+  if (!isRoad[0]) {
+    return Math.PI / 2 * 3
+  }
+  return 0
 }
 
 export const buildRoads = (scene: BABYLON.Scene) => {
