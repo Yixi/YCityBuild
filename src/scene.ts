@@ -6,6 +6,7 @@ import { SimClock } from '@root/core/clock'
 import { stepTick } from '@root/sim/simulation'
 import { MaterialLib } from '@root/render/materials'
 import { CityRenderer } from '@root/render/cityRenderer'
+import { loadModels } from '@root/render/modelLoader'
 import { OverlayManager } from '@root/render/overlay'
 import { InteractionController } from '@root/interaction/controller'
 import { Hud } from '@root/ui/hud'
@@ -18,7 +19,7 @@ export interface Game {
     frame: (dt: number) => void
 }
 
-export const createScene = (engine: BABYLON.Engine, canvas: HTMLCanvasElement): Game => {
+export const createScene = async (engine: BABYLON.Engine, canvas: HTMLCanvasElement): Promise<Game> => {
     const scene = new BABYLON.Scene(engine)
     scene.clearColor = new BABYLON.Color4(0.62, 0.74, 0.85, 1)
 
@@ -36,7 +37,8 @@ export const createScene = (engine: BABYLON.Engine, canvas: HTMLCanvasElement): 
 
     // —— 渲染 / 交互 / UI ——
     const mats = new MaterialLib(scene)
-    const renderer = new CityRenderer(scene, mats)
+    const models = await loadModels(scene)
+    const renderer = new CityRenderer(scene, mats, models)
     renderer.initialSync(world)
 
     const overlay = new OverlayManager(scene)

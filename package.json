@@ -39,6 +39,7 @@
   },
   "dependencies": {
     "babylonjs": "^9.10.1",
+    "babylonjs-loaders": "^9.10.1",
     "lodash": "^4.18.1"
   }
 }

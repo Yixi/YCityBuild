@@ -26,6 +26,10 @@ module.exports = {
           },
         },
       },
+      {
+        test: /\.(glb|gltf)$/,
+        type: 'asset/resource',
+      },
     ],
   },
   resolve: {
