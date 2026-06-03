@@ -5,6 +5,7 @@ import { clamp } from '@root/sim/util'
 import { serviceScoreAt } from '@root/sim/services'
 import {
     CONSTRUCTION_PER_TICK, OCCUPANCY_PER_DAY, GROW_BUDGET_PER_DAY, MAX_LEVEL,
+    COMMUTE_HAPPY_PENALTY, COMMUTE_GROWTH_PENALTY, NO_JOB_PENALTY,
 } from '@root/core/constants'
 
 // 每 tick：推进在建建筑的施工进度，完工转为 ACTIVE。
@@ -24,9 +25,9 @@ export const constructionStep = (world: World): void => {
 const demandForZone = (world: World, zone: ZoneType): number =>
     zone === ZoneType.R ? world.demand.r
         : zone === ZoneType.C ? world.demand.c
-            : world.demand.i
+            : zone === ZoneType.I ? world.demand.i
+                : world.demand.raw
 
-// 每日：更新现有建筑的入住/健康/升级/衰败，并在合适地块生长新建筑。
 export const dailyGrowth = (world: World): void => {
     updateActive(world)
     spawnNew(world)
@@ -39,19 +40,34 @@ const updateActive = (world: World): void => {
         if (b.roadCell < 0 || world.road[b.roadCell] !== 1) b.roadCell = roadNeighbor(world, b.cell)
 
         const dem = demandForZone(world, b.zone)
+        const roadAccess = b.roadCell >= 0
         const pollutionOk = b.zone !== ZoneType.R || world.pollution[b.cell] < 130
-        const healthy = b.roadCell >= 0 && b.powered && b.watered && dem > -0.25 && pollutionOk
-
+        // 健康只取决于「路/电/水/需求」（硬条件）；通勤与供应链是软修正，不卡死生长
+        const healthy = roadAccess && b.powered && b.watered && dem > -0.3 && pollutionOk
         const services = serviceScoreAt(world, b.cell)
-        const target = healthy
-            ? clamp(0.35 + services * 0.6 - world.pollution[b.cell] / 400, 0, 1)
-            : 0.12
+
+        let target: number
+        if (healthy) {
+            target = clamp(0.42 + services * 0.6 - world.pollution[b.cell] / 400, 0, 1)
+            if (b.zone === ZoneType.R) {
+                target -= b.commuteCost * COMMUTE_HAPPY_PENALTY
+                if (b.workplaceId < 0) target -= NO_JOB_PENALTY
+            } else if (b.zone === ZoneType.C) {
+                target -= b.shortage * 0.3   // 缺货降满意
+            } else if (b.zone === ZoneType.I) {
+                target -= b.shortage * 0.2   // 缺原料降满意
+            }
+            target = clamp(target, 0, 1)
+        } else {
+            target = 0.12
+        }
         b.happiness += (target - b.happiness) * 0.3
 
         if (healthy) {
             b.unhealthyDays = 0
-            b.occupancy = Math.min(b.capacity, b.occupancy + OCCUPANCY_PER_DAY * b.capacity)
-            // 升级：地价足够、需求旺盛、接近满员。3 级需解锁高密度。
+            let rate = OCCUPANCY_PER_DAY
+            if (b.zone === ZoneType.R) rate *= (1 - b.commuteCost * COMMUTE_GROWTH_PENALTY)
+            b.occupancy = Math.min(b.capacity, b.occupancy + rate * Math.max(1, b.capacity))
             const canLevel3 = b.level < 2 || world.unlocks.has('highdensity')
             if (b.level < MAX_LEVEL && canLevel3
                 && world.landValue[b.cell] > b.level * 55
@@ -63,7 +79,8 @@ const updateActive = (world: World): void => {
         } else {
             b.unhealthyDays++
             b.occupancy = Math.max(0, b.occupancy - OCCUPANCY_PER_DAY * b.capacity)
-            if (b.unhealthyDays > 8 && b.occupancy <= 0.5) toAbandon.push(b.cell)
+            const fatal = !roadAccess || !b.powered || !b.watered
+            if (fatal && b.unhealthyDays > 8 && b.occupancy <= 0.5) toAbandon.push(b.cell)
         }
     })
     for (const cell of toAbandon) world.removeBuilding(cell)
@@ -71,9 +88,7 @@ const updateActive = (world: World): void => {
 
 const spawnNew = (world: World): void => {
     const buckets: Record<number, number[]> = {
-        [ZoneType.R]: [],
-        [ZoneType.C]: [],
-        [ZoneType.I]: [],
+        [ZoneType.R]: [], [ZoneType.C]: [], [ZoneType.I]: [], [ZoneType.RAW]: [],
     }
 
     for (let c = 0; c < world.n; c++) {
@@ -81,17 +96,16 @@ const spawnNew = (world: World): void => {
         if (z === ZoneType.NONE) continue
         if (world.buildingId[c] >= 0 || world.road[c] === 1) continue
         const rc = roadNeighbor(world, c)
-        if (rc < 0 || world.powered[rc] !== 1) continue   // 需临路且该路段已通电
+        if (rc < 0 || world.powered[rc] !== 1) continue
         buckets[z].push(c)
     }
 
-    for (const z of [ZoneType.R, ZoneType.C, ZoneType.I]) {
+    for (const z of [ZoneType.R, ZoneType.C, ZoneType.I, ZoneType.RAW]) {
         const dem = demandForZone(world, z)
         if (dem <= 0.05) continue
         const list = buckets[z]
         if (list.length === 0) continue
         const budget = Math.min(list.length, Math.ceil(dem * GROW_BUDGET_PER_DAY))
-        // 确定性部分 Fisher–Yates，取前 budget 个
         for (let k = 0; k < budget; k++) {
             const j = k + world.rng.int(0, list.length - k)
             const tmp = list[k]

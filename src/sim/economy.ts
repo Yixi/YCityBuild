@@ -32,6 +32,12 @@ export const settleEconomy = (world: World): void => {
     }
     expense += roadCount * ROAD_MAINTENANCE
 
+    // 供应链进出口（按月累计）
+    income += world.exportEarn
+    expense += world.importSpend
+    world.exportEarn = 0
+    world.importSpend = 0
+
     income = Math.round(income)
     expense = Math.round(expense)
     world.lastIncome = income

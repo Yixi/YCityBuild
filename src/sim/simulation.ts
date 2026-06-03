@@ -3,7 +3,9 @@ import { TICKS_PER_DAY, DAYS_PER_MONTH, MONTHS_PER_YEAR } from '@root/core/const
 import { constructionStep, dailyGrowth } from '@root/sim/growth'
 import { updateNetworks } from '@root/sim/network'
 import { updateServices } from '@root/sim/services'
+import { rebuildRoutes, applyCommuteCost } from '@root/sim/logistics'
 import { updateTraffic } from '@root/sim/traffic'
+import { updateSupply } from '@root/sim/supply'
 import { updateFields } from '@root/sim/fields'
 import { updateDemand } from '@root/sim/demand'
 import { updateDisasters } from '@root/sim/disasters'
@@ -25,13 +27,12 @@ const advanceCalendar = (world: World): void => {
 }
 
 // 推进一个模拟 tick。固定子系统执行顺序（数据依赖拓扑）：
-// 网络 → 服务 → 交通 → 场 → 需求 → 生长 → 灾害 → 统计 → 进度 →（月）经济。
+// 网络 → 服务 → 分配/路径 → 交通 → 通勤成本 → 供应链 → 场 → 需求 → 生长 → 灾害 → 统计 → 进度 →（月）经济。
 export const stepTick = (world: World): void => {
     world.tick++
     world.newDay = false
     world.newMonth = false
 
-    // 每 tick：施工进度
     constructionStep(world)
 
     if (world.tick % TICKS_PER_DAY === 0) {
@@ -40,7 +41,10 @@ export const stepTick = (world: World): void => {
 
         updateNetworks(world)
         updateServices(world)
+        rebuildRoutes(world)
         updateTraffic(world)
+        applyCommuteCost(world)
+        updateSupply(world)
         updateFields(world)
         updateDemand(world)
         dailyGrowth(world)
