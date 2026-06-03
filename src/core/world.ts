@@ -1,10 +1,10 @@
 import {
-    MAP_SIZE, START_MONEY, CAP_RESIDENTIAL, CAP_COMMERCIAL, CAP_INDUSTRIAL,
+    MAP_SIZE, START_MONEY, CAP_RESIDENTIAL, CAP_COMMERCIAL, CAP_INDUSTRIAL, CAP_RAW,
     TAX_RESIDENTIAL, TAX_COMMERCIAL, TAX_INDUSTRIAL,
     POWER_PER_RESIDENT, POWER_PER_JOB, WATER_PER_RESIDENT, WATER_PER_JOB,
 } from '@root/core/constants'
 import {
-    Building, BuildingState, CellKind, ServiceType, ZoneType,
+    Building, BuildingState, CellKind, Route, ServiceType, ZoneType,
 } from '@root/core/types'
 import { SERVICE_DEFS, COVERAGE_SERVICES } from '@root/core/serviceDefs'
 import { idx, inBounds } from '@root/core/grid'
@@ -50,8 +50,16 @@ export class World {
     lastExpense = 0
     taxRates = { r: TAX_RESIDENTIAL, c: TAX_COMMERCIAL, i: TAX_INDUSTRIAL }
 
-    // —— RCI 需求（-1..1）——
-    demand = { r: 0.7, c: 0.2, i: 0.4 }
+    // —— RCI + 原料 需求（-1..1）——
+    demand = { r: 0.7, c: 0.2, i: 0.4, raw: 0.3 }
+
+    // 通勤/货运行程路径（派生，不存档）：交通拥堵聚合与车辆可视化共用
+    routes: Route[] = []
+    routesDirty = true
+
+    // 供应链月度进出口结算累计
+    importSpend = 0
+    exportEarn = 0
 
     // —— 统计聚合 ——
     population = 0
@@ -60,6 +68,7 @@ export class World {
     residentialCap = 0
     commercialCap = 0
     industrialCap = 0
+    rawCap = 0
     happiness = 0.6
 
     // 公用事业供需聚合
@@ -153,6 +162,16 @@ export class World {
             unhealthyDays: 0,
             fireDays: 0,
             happiness: 0.5,
+            workplaceId: -1,
+            shopId: -1,
+            workerCount: 0,
+            customerCount: 0,
+            commuteCost: 0,
+            supplierId: -1,
+            rawStock: 0,
+            goodsStock: 0,
+            production: 0,
+            shortage: 0,
             ...params,
         }
         this.buildings[id] = b
@@ -160,6 +179,7 @@ export class World {
         this.kind[cell] = b.isService ? CellKind.SERVICE : CellKind.BUILDING
         if (b.isService) this.serviceCells.add(id)
         this.networkDirty = true
+        this.routesDirty = true
         this.markRenderArea(cell)
         return b
     }
@@ -171,10 +191,11 @@ export class World {
         this.freeIds.push(id)
         this.serviceCells.delete(id)
         this.buildingId[cell] = -1
-        this.kind[cell] = this.zone[cell] !== ZoneType.NONE ? CellKind.EMPTY : CellKind.EMPTY
+        this.kind[cell] = CellKind.EMPTY
         this.powered[cell] = 0
         this.watered[cell] = 0
         this.networkDirty = true
+        this.routesDirty = true
         this.markRenderArea(cell)
     }
 
@@ -182,7 +203,8 @@ export class World {
     capacityFor(zone: ZoneType, level: number): number {
         const base = zone === ZoneType.R ? CAP_RESIDENTIAL
             : zone === ZoneType.C ? CAP_COMMERCIAL
-                : CAP_INDUSTRIAL
+                : zone === ZoneType.I ? CAP_INDUSTRIAL
+                    : CAP_RAW
         return base * level
     }
 

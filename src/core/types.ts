@@ -14,9 +14,10 @@ export enum CellKind {
 // 分区类型
 export enum ZoneType {
     NONE,
-    R,  // 住宅
-    C,  // 商业
-    I,  // 工业
+    R,    // 住宅
+    C,    // 商业
+    I,    // 工业（工厂）
+    RAW,  // 原料业（农场/矿场）
 }
 
 // 道路外观（与原 demo 的 ROAD_TYPE 对应）
@@ -69,6 +70,18 @@ export interface Building {
     unhealthyDays: number // 持续不健康天数（用于衰败）
     fireDays: number      // 着火天数
     happiness: number     // 0..1
+    // —— 通勤 ——
+    workplaceId: number   // R：居民工作地（C/I）建筑 id，-1 无
+    shopId: number        // R：常去商店（C）建筑 id，-1 无
+    workerCount: number   // C/I/RAW：分配到的工人数
+    customerCount: number // C：分配到的顾客数
+    commuteCost: number   // R：通勤拥堵成本 0..1
+    // —— 供应链 ——
+    supplierId: number    // I←RAW 或 C←I 的上游供应建筑 id，-1 无
+    rawStock: number      // 原料库存（工厂）
+    goodsStock: number    // 货物库存（原料业产原料 / 工厂产货物 / 商店进货物）
+    production: number     // 当日产出（用于显示）
+    shortage: number       // 0..1 投入/货物缺口
 }
 
 // 工具标识
@@ -78,7 +91,16 @@ export enum ToolId {
     ZONE_R,
     ZONE_C,
     ZONE_I,
+    ZONE_RAW,
     SERVICE,
     BULLDOZE,
     QUERY,
+}
+
+// 一条行程路径（通勤或货运）：供交通拥堵聚合与车辆可视化共用
+export interface Route {
+    path: number[]    // 沿途道路格 idx
+    volume: number    // 行程量
+    freight: boolean  // 是否货运
+    homeId: number    // 通勤工作路线回写通勤成本的住宅 id（其余为 -1）
 }

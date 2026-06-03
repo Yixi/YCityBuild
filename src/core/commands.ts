@@ -26,6 +26,7 @@ export const buildRoad = (world: World, cell: number): boolean => {
     recomputeRoadArea(world, cell)
     world.markRenderArea(cell)
     world.networkDirty = true
+    world.routesDirty = true
     return true
 }
 
@@ -76,6 +77,7 @@ export const demolish = (world: World, cell: number): boolean => {
         world.kind[cell] = CellKind.EMPTY
         recomputeRoadArea(world, cell)
         world.networkDirty = true
+        world.routesDirty = true
     } else if (k === CellKind.BUILDING || k === CellKind.SERVICE) {
         world.removeBuilding(cell)
     }

@@ -26,7 +26,12 @@ export const seedWorld = (world: World): void => {
         for (let z = 47; z <= 53; z++) {
             const c = idx(x, z)
             if (world.road[c] === 1) continue
-            const zt = x < 50 ? ZoneType.R : (z < 50 ? ZoneType.C : ZoneType.I)
+            // 住宅(左) / 商业(右上) / 工业(右下中) / 原料业(最右下)
+            let zt: ZoneType
+            if (x < 49) zt = ZoneType.R
+            else if (z < 50) zt = ZoneType.C
+            else if (x < 53) zt = ZoneType.I
+            else zt = ZoneType.RAW
             world.zone[c] = zt
             world.kind[c] = CellKind.EMPTY
         }

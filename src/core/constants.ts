@@ -53,7 +53,7 @@ export const POLLUTION_TRAFFIC = 0.5
 export const LANDVALUE_BASE = 30
 
 // 交通
-export const ROAD_CAPACITY = 24        // 单段道路容量
+export const ROAD_CAPACITY = 40        // 单段道路容量
 export const TRIPS_PER_RESIDENT = 1.0
 export const MAX_PATH = 80             // 交通分配单条路径最大长度
 
@@ -69,6 +69,30 @@ export interface ServiceDef {
     label: string
     color: [number, number, number]
 }
+
+// 原料业单格容量
+export const CAP_RAW = 14
+
+// —— 三级供应链 ——
+export const RAW_OUTPUT_PER_WORKER = 0.9    // 原料业每在岗每日产原料
+export const GOODS_PER_WORKER = 0.8         // 工厂每在岗每日产货物（上限）
+export const RAW_PER_GOOD = 0.6             // 产 1 货物消耗的原料
+export const CONSUMPTION_PER_CUSTOMER = 0.12 // 商店每顾客每日消耗货物
+export const MAX_STOCK = 60                 // 库存缓冲上限
+export const IMPORT_COST_RAW = 2            // 进口单位原料成本
+export const IMPORT_COST_GOODS = 3          // 进口单位货物成本
+export const EXPORT_PRICE_GOODS = 5         // 出口单位货物收入
+export const FREIGHT_VOLUME = 0.5           // 货运对路段交通的贡献系数
+
+// —— 通勤效应 ——
+export const COMMUTE_HAPPY_PENALTY = 0.2    // 通勤拥堵对住宅幸福的惩罚
+export const COMMUTE_GROWTH_PENALTY = 0.2   // 通勤拥堵对入住增速的惩罚
+export const NO_JOB_PENALTY = 0.2           // 找不到工作的幸福惩罚
+
+// —— 车辆可视化 ——
+export const MAX_VEHICLES = 240
+export const VEHICLE_BASE_SPEED = 3.5        // 格/秒（1x）
+export const VEHICLE_SCALE = 0.42            // 车模相对 1 格的缩放
 
 // 人口里程碑解锁（人口阈值 → 解锁项）
 export const MILESTONES: Array<{ pop: number, unlock: string, name: string }> = [
