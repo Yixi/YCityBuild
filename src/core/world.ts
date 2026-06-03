@@ -56,6 +56,7 @@ export class World {
     // 通勤/货运行程路径（派生，不存档）：交通拥堵聚合与车辆可视化共用
     routes: Route[] = []
     routesDirty = true
+    signalsDirty = true   // 路网变化 → 信号灯路口列表需重建
 
     // 供应链月度进出口结算累计
     importSpend = 0
@@ -76,6 +77,7 @@ export class World {
     powerDemand = 0
     waterSupply = 0
     waterDemand = 0
+    roadCount = 0        // 道路格数（用于车辆密度缩放）
 
     // 政策旋钮
     policies: Record<string, boolean> = {

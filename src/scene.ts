@@ -10,6 +10,7 @@ import { loadModels } from '@root/render/modelLoader'
 import { OverlayManager } from '@root/render/overlay'
 import { InteractionController } from '@root/interaction/controller'
 import { Vehicles } from '@root/agents/vehicles'
+import { TrafficSignals } from '@root/agents/trafficSignals'
 import { Hud } from '@root/ui/hud'
 import { saveWorld, loadWorld } from '@root/persistence/save'
 import { initMap } from '@root/model/map'
@@ -44,6 +45,7 @@ export const createScene = async (engine: BABYLON.Engine, canvas: HTMLCanvasElem
 
     const overlay = new OverlayManager(scene)
     const controller = new InteractionController(scene, world)
+    const signals = new TrafficSignals(scene, world)
     const vehicles = new Vehicles(scene, models, world)
     const clock = new SimClock()
 
@@ -63,14 +65,15 @@ export const createScene = async (engine: BABYLON.Engine, canvas: HTMLCanvasElem
         const prevDay = world.day
         clock.step(dt, world, stepTick)
         renderer.sync(world)
-        vehicles.update(dt, clock.speed)
+        signals.update(dt, clock.speed)
+        vehicles.update(dt, clock.speed, signals)
         if (overlay.layer !== 0 && world.day !== prevDay) overlay.update(world)
         hud.update()
     }
 
     // 调试句柄：便于控制台读取状态/快进模拟
     ;(window as unknown as { __city: unknown }).__city = {
-        world, clock, overlay, controller,
+        world, clock, overlay, controller, vehicles, signals, scene,
         step: (nTicks: number) => { for (let i = 0; i < nTicks; i++) stepTick(world) },
         save: () => saveWorld(world),
         load: () => { if (loadWorld(world)) resyncAll() },

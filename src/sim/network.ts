@@ -21,12 +21,15 @@ export const updateNetworks = (world: World): void => {
     let totalWaterSupply = 0
     let totalWaterDemand = 0
 
+    let roadCount = 0
     for (let i = 0; i < n; i++) {
+        if (world.road[i] === 1) roadCount++
         if (isConductive(world, i)) {
             world.powered[i] = 0
             world.watered[i] = 0
         }
     }
+    world.roadCount = roadCount
 
     for (let start = 0; start < n; start++) {
         if (visited[start] || !isConductive(world, start)) continue

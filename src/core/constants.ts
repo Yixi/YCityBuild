@@ -89,10 +89,19 @@ export const COMMUTE_HAPPY_PENALTY = 0.2    // 通勤拥堵对住宅幸福的惩
 export const COMMUTE_GROWTH_PENALTY = 0.2   // 通勤拥堵对入住增速的惩罚
 export const NO_JOB_PENALTY = 0.2           // 找不到工作的幸福惩罚
 
-// —— 车辆可视化 ——
+// —— 车辆可视化（微观交通）——
 export const MAX_VEHICLES = 240
+export const VEHICLE_DENSITY = 0.25          // 每道路格的车辆密度（活跃车数 = 道路格数 × 此值）
 export const VEHICLE_BASE_SPEED = 3.5        // 格/秒（1x）
 export const VEHICLE_SCALE = 0.42            // 车模相对 1 格的缩放
+export const LANE_OFFSET = 0.22              // 车道相对路中线的右偏移（双向分离）
+export const CAR_LENGTH = 0.34               // 车长（跟车间距用）
+export const SAFE_GAP = 0.6                  // 开始减速的车头间距
+export const MIN_GAP = 0.36                  // 停车的最小间距
+export const VEHICLE_ACCEL = 6               // 加减速率（格/秒²）
+// —— 信号灯 ——
+export const SIGNAL_GREEN_SEC = 6            // 绿灯时长（1x 秒）
+export const SIGNAL_YELLOW_SEC = 1.4         // 黄灯时长
 
 // 人口里程碑解锁（人口阈值 → 解锁项）
 export const MILESTONES: Array<{ pop: number, unlock: string, name: string }> = [
