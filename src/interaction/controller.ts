@@ -58,7 +58,7 @@ export class InteractionController {
 
     private isDragTool(t: ToolId): boolean {
         return t === ToolId.ROAD || t === ToolId.ZONE_R || t === ToolId.ZONE_C
-            || t === ToolId.ZONE_I || t === ToolId.BULLDOZE
+            || t === ToolId.ZONE_I || t === ToolId.ZONE_RAW || t === ToolId.BULLDOZE
     }
 
     private applyCell(cell: number): void {
@@ -68,6 +68,7 @@ export class InteractionController {
             case ToolId.ZONE_R: setZone(w, cell, ZoneType.R); break
             case ToolId.ZONE_C: setZone(w, cell, ZoneType.C); break
             case ToolId.ZONE_I: setZone(w, cell, ZoneType.I); break
+            case ToolId.ZONE_RAW: setZone(w, cell, ZoneType.RAW); break
             case ToolId.BULLDOZE: demolish(w, cell); break
             case ToolId.SERVICE: placeService(w, cell, this.serviceType); break
             default: break

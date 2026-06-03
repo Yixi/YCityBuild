@@ -32,6 +32,10 @@ const DESIRED_POOLS: Record<number, string[]> = {
     31: ['bldg_wide_1', 'bldg_large_3'],
     32: ['bldg_large_2', 'bldg_large_3'],
     33: ['tower_3'],
+    // 原料业 RAW：谷仓/筒仓/大谷仓（ZoneType.RAW=4）
+    41: ['farm_barn', 'farm_silo', 'farm_big'],
+    42: ['farm_big', 'farm_barn'],
+    43: ['farm_big'],
 }
 
 interface Visual {

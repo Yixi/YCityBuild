@@ -42,7 +42,8 @@ const CSS = `
 `
 
 const ZONE_NAME: Record<number, string> = {
-    [ZoneType.NONE]: '空地', [ZoneType.R]: '住宅', [ZoneType.C]: '商业', [ZoneType.I]: '工业',
+    [ZoneType.NONE]: '空地', [ZoneType.R]: '住宅', [ZoneType.C]: '商业',
+    [ZoneType.I]: '工业', [ZoneType.RAW]: '原料',
 }
 const STATE_NAME: Record<number, string> = {
     [BuildingState.CONSTRUCTING]: '建造中', [BuildingState.ACTIVE]: '运营中',
@@ -120,13 +121,13 @@ export class Hud {
         this.stat(top, '等级', 'tier')
         // RCI 需求条
         const rci = this.mk('div', 'rci', top)
-        for (const k of ['R', 'C', 'I']) {
+        for (const [k, label] of [['R', 'R'], ['C', 'C'], ['I', 'I'], ['Raw', '原']]) {
             const wrap = this.mk('div', 'stat', rci)
             const bar = this.mk('div', 'bar', wrap)
             const fill = this.mk<HTMLElement>('i', undefined, bar)
             this.el['rci' + k] = fill
             const l = this.mk<HTMLElement>('span', undefined, wrap)
-            l.textContent = k
+            l.textContent = label
         }
     }
 
@@ -141,6 +142,7 @@ export class Hud {
         addTool('🏠住宅', ToolId.ZONE_R)
         addTool('🏢商业', ToolId.ZONE_C)
         addTool('🏭工业', ToolId.ZONE_I)
+        addTool('🌾原料', ToolId.ZONE_RAW)
         this.serviceBtn = this.btn('⚙设施▾', bar, () => this.toggleSub())
         addTool('💥拆除', ToolId.BULLDOZE)
 
@@ -248,7 +250,18 @@ export class Hud {
                 body = `<b>${ZONE_NAME[b.zone]} Lv${b.level}</b><br>`
                     + `${STATE_NAME[b.state]} ${Math.round(b.occupancy)}/${b.capacity}<br>`
                     + `供电:${b.powered ? '✔' : '✘'} 供水:${b.watered ? '✔' : '✘'}<br>`
-                    + `幸福:${Math.round(b.happiness * 100)}%`
+                if (b.zone === ZoneType.R) {
+                    body += `工作:${b.workplaceId >= 0 ? '有' : '无'} 通勤:${Math.round(b.commuteCost * 100)}%<br>`
+                } else if (b.zone === ZoneType.C) {
+                    body += `工人:${Math.round(b.workerCount)} 顾客:${Math.round(b.customerCount)}<br>`
+                        + `货物:${Math.round(b.goodsStock)} 缺货:${Math.round(b.shortage * 100)}%<br>`
+                } else if (b.zone === ZoneType.I) {
+                    body += `工人:${Math.round(b.workerCount)}<br>`
+                        + `原料:${Math.round(b.rawStock)} 货物:${Math.round(b.goodsStock)}<br>`
+                } else if (b.zone === ZoneType.RAW) {
+                    body += `工人:${Math.round(b.workerCount)} 产原料:${b.production.toFixed(1)}<br>`
+                }
+                body += `幸福:${Math.round(b.happiness * 100)}%`
             }
         } else if (world.zone[cell] !== ZoneType.NONE) {
             body = `<b>${ZONE_NAME[world.zone[cell]]}区（待开发）</b>`
@@ -286,6 +299,7 @@ export class Hud {
         setBar('R', w.demand.r, '#4ade80')
         setBar('C', w.demand.c, '#60a5fa')
         setBar('I', w.demand.i, '#fbbf24')
+        setBar('Raw', w.demand.raw, '#c8965a')
 
         // 工具高亮
         this.toolBtns.forEach((b, tool) => {

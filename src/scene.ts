@@ -9,6 +9,7 @@ import { CityRenderer } from '@root/render/cityRenderer'
 import { loadModels } from '@root/render/modelLoader'
 import { OverlayManager } from '@root/render/overlay'
 import { InteractionController } from '@root/interaction/controller'
+import { Vehicles } from '@root/agents/vehicles'
 import { Hud } from '@root/ui/hud'
 import { saveWorld, loadWorld } from '@root/persistence/save'
 import { initMap } from '@root/model/map'
@@ -43,6 +44,7 @@ export const createScene = async (engine: BABYLON.Engine, canvas: HTMLCanvasElem
 
     const overlay = new OverlayManager(scene)
     const controller = new InteractionController(scene, world)
+    const vehicles = new Vehicles(scene, models, world)
     const clock = new SimClock()
 
     const resyncAll = (): void => {
@@ -61,6 +63,7 @@ export const createScene = async (engine: BABYLON.Engine, canvas: HTMLCanvasElem
         const prevDay = world.day
         clock.step(dt, world, stepTick)
         renderer.sync(world)
+        vehicles.update(dt, clock.speed)
         if (overlay.layer !== 0 && world.day !== prevDay) overlay.update(world)
         hud.update()
     }

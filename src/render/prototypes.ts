@@ -66,6 +66,7 @@ export const buildPrototypes = (
     reg.set('zone:' + ZoneType.R, unitBox(scene, mats.getAlpha('zone-r', [0.4, 0.85, 0.4], 0.4), 'zone:' + ZoneType.R, 0.92, 0.04, 0.92))
     reg.set('zone:' + ZoneType.C, unitBox(scene, mats.getAlpha('zone-c', [0.4, 0.6, 1], 0.4), 'zone:' + ZoneType.C, 0.92, 0.04, 0.92))
     reg.set('zone:' + ZoneType.I, unitBox(scene, mats.getAlpha('zone-i', [1, 0.85, 0.3], 0.4), 'zone:' + ZoneType.I, 0.92, 0.04, 0.92))
+    reg.set('zone:' + ZoneType.RAW, unitBox(scene, mats.getAlpha('zone-raw', [0.7, 0.55, 0.3], 0.4), 'zone:' + ZoneType.RAW, 0.92, 0.04, 0.92))
 
     // —— 树（复用 demo 几何）——
     reg.set('tree', finalize(createTree(scene), 'tree'))

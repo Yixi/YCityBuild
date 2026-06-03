@@ -20,6 +20,15 @@ import house2 from '@root/assets/models/house_2.glb'
 import house3 from '@root/assets/models/house_3.glb'
 import house4 from '@root/assets/models/house_4.glb'
 import house5 from '@root/assets/models/house_5.glb'
+// CC0 农场（原料业，Quaternius Farm Buildings）
+import farmBarn from '@root/assets/models/farm_barn.glb'
+import farmSilo from '@root/assets/models/farm_silo.glb'
+import farmBig from '@root/assets/models/farm_big.glb'
+// CC0 车辆（Quaternius LowPoly Cars）
+import car1 from '@root/assets/models/car_1.glb'
+import car2 from '@root/assets/models/car_2.glb'
+import carTaxi from '@root/assets/models/car_taxi.glb'
+import carSuv from '@root/assets/models/car_suv.glb'
 
 const MANIFEST: Array<[string, string]> = [
     ['bldg_small_1', bldgSmall1],
@@ -39,6 +48,13 @@ const MANIFEST: Array<[string, string]> = [
     ['house_3', house3],
     ['house_4', house4],
     ['house_5', house5],
+    ['farm_barn', farmBarn],
+    ['farm_silo', farmSilo],
+    ['farm_big', farmBig],
+    ['car_1', car1],
+    ['car_2', car2],
+    ['car_taxi', carTaxi],
+    ['car_suv', carSuv],
 ]
 
 // 把导入的（可能含多子网格 + 坐标系转换节点）GLB 合并成单个原型网格：
