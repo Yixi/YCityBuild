@@ -10,7 +10,7 @@ export enum ROAD_TYPE {
 
 export const ROAD_NAME = 'road'
 
-const createHorizontalRoad = (
+export const createHorizontalRoad = (
     scene: BABYLON.Scene,
     [shoulderMaterials, roadBedMaterials]: [BABYLON.StandardMaterial, BABYLON.StandardMaterial]
 ) => {
@@ -54,7 +54,7 @@ const createHorizontalRoad = (
   return road
 }
 
-const createConnerRoad = (
+export const createConnerRoad = (
     scene: BABYLON.Scene,
     [shoulderMaterials, roadBedMaterials]: [BABYLON.StandardMaterial, BABYLON.StandardMaterial]
 ) => {
@@ -111,7 +111,7 @@ const createConnerRoad = (
   return road
 }
 
-const createTIntersectionRoad = (
+export const createTIntersectionRoad = (
     scene: BABYLON.Scene,
     [shoulderMaterials, roadBedMaterials]: [BABYLON.StandardMaterial, BABYLON.StandardMaterial]
 ) => {
@@ -167,7 +167,7 @@ const createTIntersectionRoad = (
   return road
 }
 
-const createCrossroadRoad = (
+export const createCrossroadRoad = (
     scene: BABYLON.Scene,
     [shoulderMaterials, roadBedMaterials]: [BABYLON.StandardMaterial, BABYLON.StandardMaterial]
 ) => {
