@@ -3,8 +3,21 @@ import { World } from '@root/core/world'
 import { MaterialLib } from '@root/render/materials'
 import { buildPrototypes } from '@root/render/prototypes'
 import { InstanceField } from '@root/render/instanceField'
-import { BuildingState, RoadShape, ZoneType } from '@root/core/types'
+import { BuildingState, RoadShape, ServiceType, ZoneType } from '@root/core/types'
 import { xOf, zOf } from '@root/core/grid'
+
+// 设施类型 → 模型 key（缺失则回退彩色方块）
+const SERVICE_MODEL: Record<number, string> = {
+    [ServiceType.POWER]: 'svc_power',
+    [ServiceType.WATER]: 'svc_water',
+    [ServiceType.FIRE]: 'svc_fire',
+    [ServiceType.POLICE]: 'svc_police',
+    [ServiceType.HEALTH]: 'svc_health',
+    [ServiceType.EDUCATION]: 'svc_education',
+    [ServiceType.PARK]: 'svc_park',
+    [ServiceType.GARBAGE]: 'svc_garbage',
+    [ServiceType.TRANSIT]: 'svc_transit',
+}
 
 const R_H = [0.7, 1.3, 2.1]
 const C_H = [0.9, 1.7, 2.7]
@@ -105,7 +118,11 @@ export class CityRenderer {
         if (id >= 0) {
             const b = world.buildings[id]
             if (b) {
-                if (b.isService) return { key: 'svc:' + b.service, sy: 1, rot: 0 }
+                if (b.isService) {
+                    const mk = SERVICE_MODEL[b.service]
+                    if (mk && this.prototypes.has(mk)) return { key: mk, sy: 1, rot: 0 }
+                    return { key: 'svc:' + b.service, sy: 1, rot: 0 }
+                }
                 if (b.state === BuildingState.CONSTRUCTING) {
                     return { key: 'construct', sy: 0.2 + 0.8 * b.progress, rot: 0 }
                 }

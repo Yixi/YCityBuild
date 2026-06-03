@@ -29,6 +29,16 @@ import car1 from '@root/assets/models/car_1.glb'
 import car2 from '@root/assets/models/car_2.glb'
 import carTaxi from '@root/assets/models/car_taxi.glb'
 import carSuv from '@root/assets/models/car_suv.glb'
+// CC-BY 设施（poly.pizza / Google Poly 存档，署名见 CREDITS）
+import svcPower from '@root/assets/models/svc_power.glb'
+import svcWater from '@root/assets/models/svc_water.glb'
+import svcFire from '@root/assets/models/svc_fire.glb'
+import svcPolice from '@root/assets/models/svc_police.glb'
+import svcHealth from '@root/assets/models/svc_health.glb'
+import svcEducation from '@root/assets/models/svc_education.glb'
+import svcPark from '@root/assets/models/svc_park.glb'
+import svcGarbage from '@root/assets/models/svc_garbage.glb'
+import svcTransit from '@root/assets/models/svc_transit.glb'
 
 const MANIFEST: Array<[string, string]> = [
     ['bldg_small_1', bldgSmall1],
@@ -55,14 +65,48 @@ const MANIFEST: Array<[string, string]> = [
     ['car_2', car2],
     ['car_taxi', carTaxi],
     ['car_suv', carSuv],
+    ['svc_power', svcPower],
+    ['svc_water', svcWater],
+    ['svc_fire', svcFire],
+    ['svc_police', svcPolice],
+    ['svc_health', svcHealth],
+    ['svc_education', svcEducation],
+    ['svc_park', svcPark],
+    ['svc_garbage', svcGarbage],
+    ['svc_transit', svcTransit],
 ]
 
 // 把导入的（可能含多子网格 + 坐标系转换节点）GLB 合并成单个原型网格：
 // 烘焙世界变换 → 归一化到 footprint≈0.92 格、基座 y=0、x/z 居中 → 作为 thin-instance 原型。
-const prepareProto = (key: string, meshes: BABYLON.AbstractMesh[]): BABYLON.Mesh | null => {
+// 把（高成本/慢编译的）PBR 材质转为轻量 StandardMaterial：保留底色与贴图，统一扁平风格、消除着色器编译卡顿。
+const toStandard = (mat: BABYLON.Material, scene: BABYLON.Scene): BABYLON.Material => {
+    if (!mat) return mat
+    const cls = mat.getClassName ? mat.getClassName() : ''
+    if (cls.indexOf('PBR') >= 0) {
+        const pbr = mat as unknown as {
+            albedoColor?: BABYLON.Color3, albedoTexture?: BABYLON.BaseTexture,
+            emissiveColor?: BABYLON.Color3, transparencyMode?: number, name: string,
+        }
+        const s = new BABYLON.StandardMaterial(pbr.name + '-std', scene)
+        if (pbr.albedoColor) s.diffuseColor = pbr.albedoColor.clone()
+        if (pbr.albedoTexture) s.diffuseTexture = pbr.albedoTexture as BABYLON.Texture
+        if (pbr.emissiveColor) s.emissiveColor = pbr.emissiveColor.clone()
+        s.specularColor = new BABYLON.Color3(0, 0, 0)
+        if (pbr.transparencyMode != null) s.transparencyMode = pbr.transparencyMode
+        return s
+    }
+    const multi = mat as unknown as { subMaterials?: BABYLON.Material[] }
+    if (multi.subMaterials) {
+        multi.subMaterials = multi.subMaterials.map((sm) => sm ? toStandard(sm, scene) : sm)
+    }
+    return mat
+}
+
+const prepareProto = (key: string, meshes: BABYLON.AbstractMesh[], scene: BABYLON.Scene): BABYLON.Mesh | null => {
     const real: BABYLON.Mesh[] = []
     for (const m of meshes) {
         if (m instanceof BABYLON.Mesh && m.getTotalVertices() > 0) {
+            if (m.material) m.material = toStandard(m.material, scene)
             m.computeWorldMatrix(true)
             real.push(m)
         }
@@ -101,7 +145,7 @@ export const loadModels = async (scene: BABYLON.Scene): Promise<Map<string, BABY
     for (const [key, url] of MANIFEST) {
         try {
             const res = await BABYLON.SceneLoader.ImportMeshAsync('', '', url, scene)
-            const proto = prepareProto(key, res.meshes)
+            const proto = prepareProto(key, res.meshes, scene)
             if (proto) out.set(key, proto)
             // 清理导入残留的空变换节点（如 __root__）
             for (const m of res.meshes) {
