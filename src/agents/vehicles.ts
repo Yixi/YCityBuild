@@ -51,7 +51,7 @@ export class Vehicles {
     private active = false
     private buckets: Map<number, Veh[]> = new Map()
 
-    constructor(scene: BABYLON.Scene, models: Map<string, BABYLON.Mesh>, private world: World) {
+    constructor(private scene: BABYLON.Scene, models: Map<string, BABYLON.Mesh>, private world: World) {
         const commuteFields: InstanceField[] = []
         const freightFields: InstanceField[] = []
         for (const k of COMMUTE_KEYS) {
@@ -169,13 +169,22 @@ export class Vehicles {
             arr.push(v)
         }
 
-        // 趟2：用稳定快照计算目标速度（跟车 + 信号停止线）
+        // 路口占用查询（供丁字路口让行）
+        const occupied = (cell: number): boolean => {
+            for (let d = 0; d < 4; d++) {
+                const a = this.buckets.get(cell * 4 + d)
+                if (a && a.length > 0) return true
+            }
+            return false
+        }
+
+        // 趟2：用稳定快照计算目标速度（跟车 + 信号/让行停止线）
         for (const v of this.vehicles) {
             if (!v.lane) continue
             const free = VEHICLE_BASE_SPEED
             let gap = this.leaderGap(v)
             if (signals) {
-                const sg = signals.stopGap(v.x, v.z, v.dirIdx)
+                const sg = signals.stopGap(v.x, v.z, v.dirIdx, occupied)
                 if (sg < gap) gap = sg
             }
             let target: number
@@ -186,6 +195,12 @@ export class Vehicles {
             const cong = cell >= 0 ? this.world.traffic[cell] : 0
             v.target = target * (1 - cong * 0.35)
         }
+
+        // 远景 LOD：超出相机视距（随缩放半径缩放）的车辆不渲染
+        const cam = this.scene.activeCamera as BABYLON.ArcRotateCamera
+        const camX = cam ? cam.target.x : 0
+        const camZ = cam ? cam.target.z : 0
+        const lodFar2 = cam && cam.radius ? (cam.radius * 1.35) ** 2 : Infinity
 
         // 趟3：推进 + 写矩阵 + 更新快照
         for (const v of this.vehicles) {
@@ -198,6 +213,10 @@ export class Vehicles {
             v.seg = sampleLane(v.lane, v.s, v.seg, _out)
             v.x = _out[0]; v.z = _out[1]
             setDirProj(v, _out[2], _out[3])
+
+            const ddx = v.x - camX
+            const ddz = v.z - camZ
+            if (ddx * ddx + ddz * ddz > lodFar2) { v.field.set(v.id, HIDDEN); continue }
 
             const yaw = Math.atan2(_out[2], _out[3])
             BABYLON.Quaternion.RotationYawPitchRollToRef(yaw, 0, 0, _q)
