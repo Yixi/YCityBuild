@@ -113,12 +113,13 @@ const rebuildSurroundingArea = (x: number, z: number, scene: BABYLON.Scene) => {
 export const clickToBuildRoad = (scene: BABYLON.Scene) => {
   scene.onPointerObservable.add((pointerInfo: BABYLON.PointerInfo) => {
     switch (pointerInfo.type) {
-        case BABYLON.PointerEventTypes.POINTERTAP:
+        case BABYLON.PointerEventTypes.POINTERTAP: {
             const x: number = Math.round(pointerInfo.pickInfo.pickedPoint.x)
             const z: number = Math.round(pointerInfo.pickInfo.pickedPoint.z)
             store.map[x][z].meshType = MESH_TYPE.ROAD
             rebuildSurroundingArea(x, z, scene)
             break
+        }
     }
 })
 

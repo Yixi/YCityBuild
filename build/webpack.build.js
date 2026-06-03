@@ -1,39 +1,45 @@
 const path = require('path')
-const webpack = require('webpack')
 const HTMLWebpackPlugin = require('html-webpack-plugin')
-const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin")
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
 
 module.exports = {
-  entry: '../src/index.ts',
+  entry: path.resolve(__dirname, '../src/index.ts'),
   output: {
-    filename: "[name]-[hash:7].js",
-    path: path.resolve(__dirname, "../dist"),
-    chunkFilename: "[chunkhash].js",
-    publicPath: "",
+    filename: '[name]-[contenthash:7].js',
+    path: path.resolve(__dirname, '../dist'),
+    chunkFilename: '[contenthash].js',
+    publicPath: '',
+    clean: true,
   },
-  context: path.resolve(__dirname, "../src"),
-  devtool: "hidden-source-map",
+  context: path.resolve(__dirname, '../src'),
+  devtool: 'hidden-source-map',
   bail: true,
-  mode: "production",
+  mode: 'production',
   module: {
     rules: [
       {
         test: /\.ts$/,
         use: {
-          loader: "ts-loader",
+          loader: 'ts-loader',
           options: {
-            transpileOnly: true
-          }
-        }
+            transpileOnly: true,
+          },
+        },
       },
-    ]
+    ],
   },
   resolve: {
     alias: {
-      "@root": path.resolve(__dirname, "../src"),
+      '@root': path.resolve(__dirname, '../src'),
     },
-    extensions: [".ts", ".js", ".json"],
+    extensions: ['.ts', '.js', '.json'],
+  },
+  optimization: {
+    splitChunks: {
+      chunks: 'all',
+      minSize: 30000,
+      maxSize: 300000,
+    },
   },
   stats: {
     cached: true,
@@ -44,17 +50,13 @@ module.exports = {
   },
   plugins: [
     new ForkTsCheckerWebpackPlugin({
-      tsconfig: path.resolve(__dirname, "../tsconfig.json"),
-      tslint: path.resolve(__dirname, "../tslint.json"),
+      typescript: {
+        configFile: path.resolve(__dirname, '../tsconfig.json'),
+      },
     }),
-    new CleanWebpackPlugin(),
     new HTMLWebpackPlugin({
-      template: "../src/app.html",
-      filename: "index.html",
+      template: path.resolve(__dirname, '../src/app.html'),
+      filename: 'index.html',
     }),
-    new webpack.optimize.AggressiveSplittingPlugin({
-      minSize: 30000,
-      maxSize: 300000
-    }),
-  ]
+  ],
 }

@@ -5,41 +5,40 @@
   "repository": "git@github.com:Yixi/YCityBuilding.git",
   "author": "Yixi <lyh1112@gmail.com>",
   "license": "MIT",
+  "packageManager": "pnpm@10.23.0",
   "scripts": {
-    "start": "yarn dev",
-    "dev": "webpack-dev-server --config build/webpack.dev.js --progress",
+    "start": "pnpm dev",
+    "dev": "webpack serve --config build/webpack.dev.js --progress",
     "build": "webpack --config build/webpack.build.js",
-    "lint": "yarn tslint --project tsconfig.json",
-    "typecheck": "tsc --noEmit"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged",
-      "pre-push": "yarn lint && yarn typecheck "
-    }
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "tsc --noEmit",
+    "prepare": "husky"
   },
   "lint-staged": {
-    "./src/**/*.{js,jsx,ts,tsx,json,md}": [
-      "yarn lint --fix",
-      "git add"
+    "src/**/*.ts": [
+      "eslint --fix"
     ]
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.149",
-    "clean-webpack-plugin": "^3.0.0",
-    "fork-ts-checker-webpack-plugin": "^3.1.1",
-    "html-webpack-plugin": "^4.0.0-beta.11",
-    "husky": "^4.0.3",
-    "lint-staged": "^9.5.0",
-    "ts-loader": "^6.2.1",
-    "tslint": "^5.20.1",
-    "typescript": "^3.7.4",
-    "webpack": "^4.41.5",
-    "webpack-cli": "^3.3.10",
-    "webpack-dev-server": "^3.10.1"
+    "@eslint/js": "^10.0.1",
+    "@stylistic/eslint-plugin": "^5.10.0",
+    "@types/lodash": "^4.17.24",
+    "eslint": "^10.4.1",
+    "fork-ts-checker-webpack-plugin": "^9.1.0",
+    "globals": "^17.6.0",
+    "html-webpack-plugin": "^5.6.7",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.7",
+    "ts-loader": "^9.6.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.60.1",
+    "webpack": "^5.107.2",
+    "webpack-cli": "^7.0.3",
+    "webpack-dev-server": "^5.2.4"
   },
   "dependencies": {
-    "babylonjs": "^4.0.3",
-    "lodash": "^4.17.15"
+    "babylonjs": "^9.10.1",
+    "lodash": "^4.18.1"
   }
 }

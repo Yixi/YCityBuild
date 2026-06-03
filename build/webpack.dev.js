@@ -1,73 +1,63 @@
 const path = require('path')
 const HTMLWebpackPlugin = require('html-webpack-plugin')
-const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin")
-const webpack = require('webpack')
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
 
 const PORT = 4233
-const _HOST = '0.0.0.0'
-const HOST = `http://${_HOST}`
-const URL = `${HOST}:${PORT}`
+const HOST = '0.0.0.0'
 
 module.exports = {
-  entry: [
-    `webpack-dev-server/client?${URL}`,
-    'webpack/hot/only-dev-server',
-    '../src/index.ts'
-  ],
+  entry: path.resolve(__dirname, '../src/index.ts'),
   output: {
-    filename: "app.js",
-    path: path.join(__dirname, "../dist"),
-    publicPath: "/",
+    filename: 'app.js',
+    path: path.join(__dirname, '../dist'),
+    publicPath: '/',
+    clean: true,
   },
-  context: path.resolve(__dirname, "../src"),
-  devtool: "cheap-module-source-map",
+  context: path.resolve(__dirname, '../src'),
+  devtool: 'cheap-module-source-map',
+  mode: 'development',
   devServer: {
-    stats: {
-      colors: true,
-      modules: false,
-      children: false,
-      chunks: false,
-      chunkModules: false,
-    },
     hot: true,
-    // enable HMR on the server
     compress: true,
-    contentBase: path.resolve(__dirname, '../src'),
-    // match the output path
+    host: HOST,
     port: PORT,
-    host: _HOST,
-    publicPath: URL,
     historyApiFallback: true,
+    static: {
+      directory: path.resolve(__dirname, '../src'),
+    },
+    client: {
+      logging: 'warn',
+      overlay: true,
+    },
   },
-  mode: "development",
   module: {
     rules: [
       {
         test: /\.ts$/,
         use: {
-          loader: "ts-loader",
+          loader: 'ts-loader',
           options: {
-            transpileOnly: true
-          }
-        }
-      }
-    ]
+            transpileOnly: true,
+          },
+        },
+      },
+    ],
   },
   resolve: {
     alias: {
-      "@root": path.resolve(__dirname, "../src"),
+      '@root': path.resolve(__dirname, '../src'),
     },
-    extensions: [".ts", ".js", ".json"],
+    extensions: ['.ts', '.js', '.json'],
   },
   plugins: [
     new ForkTsCheckerWebpackPlugin({
-      tsconfig: path.resolve(__dirname, "../tsconfig.json"),
-      tslint: path.resolve(__dirname, "../tslint.json"),
+      typescript: {
+        configFile: path.resolve(__dirname, '../tsconfig.json'),
+      },
     }),
     new HTMLWebpackPlugin({
-      template: "../src/app.html",
-      filename: "index.html",
+      template: path.resolve(__dirname, '../src/app.html'),
+      filename: 'index.html',
     }),
-    new webpack.HotModuleReplacementPlugin(),
-  ]
+  ],
 }
